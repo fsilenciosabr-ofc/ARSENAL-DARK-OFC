@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Visual Experience - Arsenal Dark</title>
+    <style>
+        :root {
+            --primary-color: #FFD700; 
+            --bg-color: #000000;
+            --transition-speed: 1.2s; /* Mais lento para ser mais suave */
+            --media-width: 85%;
+        }
+
+        /* RESET E BLOQUEIO LATERAL */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            overflow-x: hidden;
+            background-color: var(--bg-color);
+            font-family: 'Arial Black', sans-serif;
+            overscroll-behavior-x: none;
+            color: white;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px; 
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* GALERIA */
+        #image-gallery {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 30px;
+        }
+
+        .media-wrapper, .video-container {
+            width: var(--media-width);
+            max-width: 380px;
+            margin: 20px 0;
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* ANIMAÇÕES DE SURGIMENTO SUAVE (MELHORADAS) */
+        .reveal {
+            opacity: 0;
+            will-change: transform, opacity;
+            transition: opacity var(--transition-speed) cubic-bezier(0.22, 1, 0.36, 1), 
+                        transform var(--transition-speed) cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        /* Começam bem mais afastados para o efeito ser visível */
+        .from-left { transform: translateX(-150px); }
+        .from-right { transform: translateX(150px); }
+
+        /* Quando entram na tela, voltam para a posição original */
+        .reveal.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* BOTÃO CTA */
+        .btn-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 0 40px 0;
+        }
+
+        .cta-button, .btn-play {
+            background-color: var(--primary-color);
+            color: #000;
+            border: 6px solid var(--primary-color);
+            border-radius: 100px;
+            width: var(--media-width);
+            max-width: 380px;
+            height: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            cursor: pointer;
+            animation: glowPulse 2s infinite ease-in-out;
+            transition: transform 0.2s ease;
+        }
+
+        @keyframes glowPulse {
+            0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.4); transform: scale(1); }
+            50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.7); transform: scale(1.02); }
+            100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.4); transform: scale(1); }
+        }
+
+        /* SEÇÃO VÍDEO */
+        .video-container {
+            aspect-ratio: 9/16;
+            background: #111;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            background: rgba(0,0,0,0.6);
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .hide { display: none !important; }
+
+        footer {
+            width: 100%;
+            text-align: center;
+            padding: 70px 10px;
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            opacity: 0.4;
+            font-family: sans-serif;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <div id="image-gallery"></div>
+
+        <div class="btn-container reveal from-left">
+            <button class="cta-button">QUERO APROVEITAR!</button>
+        </div>
+
+        <div class="video-container reveal from-right">
+            <div class="video-overlay" id="overlay">
+                <button class="btn-play" id="playBtn">ASSISTIR</button>
+            </div>
+            <video id="reelsVideo" playsinline>
+                <source src="video.mp4" type="video/mp4">
+            </video>
+        </div>
+
+        <footer>
+            ARSENAL-DARK-OFC TODOS DEIREITOS RESERVADOS
+        </footer>
+
+    </div>
+
+    <script>
+        const gallery = document.getElementById('image-gallery');
+        for (let i = 1; i <= 18; i++) {
+            const wrap = document.createElement('div');
+            // Alterna Direita e Esquerda conforme a ordem
+            wrap.className = `media-wrapper reveal ${i % 2 === 0 ? 'from-right' : 'from-left'}`;
+            
+            const img = document.createElement('img');
+            img.src = `img${i}.png`;
+            img.loading = "lazy";
+            
+            wrap.appendChild(img);
+            gallery.appendChild(wrap);
+        }
+
+        // Observer configurado para uma transição mais perceptível
+        const obs = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    // Descomente a linha abaixo se quiser que a animação aconteça apenas uma vez:
+                    // obs.unobserve(entry.target);
+                }
+            });
+        }, { 
+            threshold: 0.1,
+            rootMargin: "0px 0px -50px 0px" // Dispara um pouco antes do item chegar ao centro
+        });
+
+        document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+        const v = document.getElementById('reelsVideo');
+        const b = document.getElementById('playBtn');
+        const o = document.getElementById('overlay');
+
+        b.addEventListener('click', () => {
+            v.play();
+            v.muted = false; 
+            o.classList.add('hide');
+        });
+    </script>
+</body>
+</html>
